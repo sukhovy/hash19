@@ -17,7 +17,7 @@ namespace Hash19
             V
         }
 
-        const string sample = "e";
+        const string sample = "d";
 
         const string inputFile = @"D:\" + sample + ".txt";
 
@@ -217,6 +217,9 @@ namespace Hash19
 
             var score = 0;
 
+            var currentPercent = 0;
+            var prevPercent = -1;
+
             while (vertical.Any() || horizontal.Any())
             {
                 var currentLastSlide = result[result.Count - 1];
@@ -233,14 +236,21 @@ namespace Hash19
                 })
                 .OrderByDescending( x => x.score)
                 .FirstOrDefault();
-                
-                var vMax = vertical.AsParallel()
-                    .Take(100)
+
+                var tmp = vertical
+                    .Take(150)
+                    .ToList();
+
+                var main = new HashSet<int>(tmp.Select(x => x.Key));
+
+                var vMax = tmp
+                    .AsParallel()
                     .WithDegreeOfParallelism(12)
                     .SelectMany(v1 =>
                 {
-                    return vertical.Where(x => x.Key > v1.Key)
-                        .Take(100)
+                    return vertical
+                        .Where(x => !main.Contains(x.Key))
+                        .Take(200)
                         .Select(v2 => {
 
                         return new TmpSlide()
@@ -288,8 +298,13 @@ namespace Hash19
 
                 score += maxScore;
 
-                Console.WriteLine($"result size: {result.Count * 100 / total}%, score {score}");
-                
+                currentPercent = result.Count * 100 / total;
+                if (currentPercent != prevPercent)
+                {
+                    prevPercent = currentPercent;
+                    Console.WriteLine($"generating. size: {currentPercent}%, score {score}");
+                }
+
             }
 
             Console.WriteLine($"Finish score: {score}");
