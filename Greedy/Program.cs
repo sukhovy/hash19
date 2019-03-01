@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace Hash19
             V
         }
 
-        const string sample = "b";
+        const string sample = "e";
 
         const string inputFile = @"D:\" + sample + ".txt";
 
@@ -188,7 +188,7 @@ namespace Hash19
                 horizontal.Add(i, horizontalList[i]);
             }
 
-            var total = horizontal.Count / 2 + vertical.Count;
+            var total = horizontal.Count + vertical.Count / 2;
 
             if (horizontal.Any())
             {
@@ -235,10 +235,13 @@ namespace Hash19
                 .FirstOrDefault();
                 
                 var vMax = vertical.AsParallel()
+                    .Take(100)
                     .WithDegreeOfParallelism(12)
                     .SelectMany(v1 =>
                 {
-                    return vertical.Where(x => x.Key > v1.Key).Select(v2 => {
+                    return vertical.Where(x => x.Key > v1.Key)
+                        .Take(100)
+                        .Select(v2 => {
 
                         return new TmpSlide()
                         {
